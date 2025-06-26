@@ -8,12 +8,10 @@ function createVerticalNameDiv(name, defaultFontSize) {
   const div = document.createElement("div");
   div.className = "vertical-name";
 
-  // Start with default, and adjust if it's Chinese
   let customFontSize = defaultFontSize;
   const chineseOnly = name.replace(/[^\u4e00-\u9fa5]/g, "");
   const length = chineseOnly.length;
 
-  // ✨ Gentle override ONLY if the name is too long for the row font
   if (length >= 13 && parseInt(defaultFontSize) > 30) {
     customFontSize = "40px";
   } else if (length >= 11 && parseInt(defaultFontSize) > 40) {
@@ -43,12 +41,10 @@ function createVerticalNameDiv(name, defaultFontSize) {
       div.appendChild(span);
     });
   } else {
-    // Pure Chinese or pure English — let writing-mode do its job
     [...name].forEach((char) => {
       const span = document.createElement("span");
       span.textContent = char;
 
-      // NEW: Rotate brackets vertically
       if (/[\(\)（）]/.test(char)) {
         span.classList.add("rotated-bracket");
       }
@@ -88,7 +84,7 @@ function createVerticalNameDivWithTitle(name, defaultFontSize) {
     const titleDiv = document.createElement("div");
     titleDiv.className = "horizontal-letter";
     titleDiv.textContent = title;
-    titleDiv.style.fontSize = "40px"; // small horizontal title
+    titleDiv.style.fontSize = "40px";
     titleDiv.style.textAlign = "center";
     titleDiv.style.marginTop = "10px";
 
@@ -112,12 +108,6 @@ function fixChineseCompanySplitRender() {
     const topZone = page.querySelector(".top-zone");
     const middleZone = page.querySelector(".middle-zone");
 
-    // ✅ Only run fix if:
-    // 1. 1–3 Chinese company names exist in topZone
-    // 2. middleZone has NO vertical-name (donors)
-    // 3. middleZone has NO English name
-    // 4. 合家 not present
-
     const topNames = Array.from(topZone.querySelectorAll("div"))
       .map((div) => div.textContent.trim())
       .filter((text) => topSuffixRE.test(text));
@@ -133,8 +123,7 @@ function fixChineseCompanySplitRender() {
       !hasEnglish &&
       !hasHeJia
     ) {
-      // 🧽 Only in this exact condition do we move top companies into vertical middle
-
+      
       topNames.forEach((companyName) => {
         const matchingDiv = Array.from(topZone.querySelectorAll("div")).find(
           (d) => d.textContent.trim() === companyName
@@ -164,11 +153,10 @@ function fixChineseCompanySplitRender() {
 
 function splitEnglishNameSmartly(name) {
   const words = name.trim().split(/\s+/);
-  if (words.length !== 4) return null; // Only handle 4-word names
+  if (words.length !== 4) return null;
 
   const [w1, w2, w3, w4] = words;
 
-  // Compare length of 1st and 4th word
   const firstIsNickname = w1.length > w4.length;
   if (firstIsNickname) {
     return {
@@ -193,7 +181,6 @@ function paginateChineseNames(chineseNames, maxPerPage = 70) {
 
 function generate() {
   const rawInput = document.getElementById("input").value.trim();
-  // 🧼 Fix common name breaks like '&\nTyre' into '& Tyre'
   const cleanInput = rawInput.replace(/&\s*\n\s*/g, "& ");
 
   const pageBlocks = cleanInput
@@ -214,7 +201,7 @@ function generate() {
     let middleChinese = [];
     let middleEnglish = [];
     let hasHeJia = false;
-    let topNamesSet = new Set(); // 👈 Live tracking set
+    let topNamesSet = new Set();
 
     const zhCompanyRE =
       /(集團|有限公司|有限责任公司|私人有限公司|表行|茶莊|農場|公司|中心|會館|學校|新記|餐馆|面包店|蝦餅)$/;
@@ -228,14 +215,12 @@ function generate() {
       "LLP",
       "PLC",
 
-      // 👇 add your own – one per line, use \\s for spaces, escape dots with \\.
       "Construction",
       "Graphics",
       "Engineering",
       "Renovation\\sWorks",
       "Trading",
       "Services",
-      // e.g. add this:
       "Hacking\\s&\\sRenovation\\sWorks",
     ];
 
@@ -245,13 +230,11 @@ function generate() {
     lines.forEach((line) => {
       line.split(commaSplitRE).forEach((chunk) => {
         const tokens = chunk.trim().split(/\s+/).filter(Boolean);
-        // Extra fallback: scan full token line for English company name based on capitalised words and strong keywords
         const joined = tokens.join(" ");
         const capitalisedWords = tokens.filter((w) =>
           /^[A-Z&][a-zA-Z&]*$/.test(w)
         );
 
-        // 🧠 Scan left-to-right to find the *longest matching* company phrase
         let bestCompanyIdx = -1;
         let bestCompanyName = "";
 
@@ -260,7 +243,7 @@ function generate() {
           if (enSuffixRE.test(slice)) {
             bestCompanyIdx = i;
             bestCompanyName = slice;
-            break; // ✅ Stop at first valid full match
+            break;
           }
         }
 
@@ -284,7 +267,7 @@ function generate() {
             }
           }
 
-          return; // 🚫 Don’t double-process this line
+          return;
         }
 
         if (
@@ -303,7 +286,6 @@ function generate() {
         let matchStart = -1;
         let matchEnd = -1;
 
-        // Scan every possible slice
         for (let start = 0; start < tokens.length; start++) {
           let candidate = "";
           for (let end = start; end < tokens.length; end++) {
@@ -329,13 +311,12 @@ function generate() {
             )
           ) {
             topNames.push(cleanCompany);
-            topNamesSet.add(cleanCompany.toLowerCase()); // 💥 This keeps the set live
+            topNamesSet.add(cleanCompany.toLowerCase());
           }
           donorTokens.forEach(classifyToken);
           return;
         }
 
-        // English company detection
         let buffer = [];
         tokens.forEach((word, idx) => {
           buffer.push(word);
@@ -382,7 +363,6 @@ function generate() {
       });
     });
 
-    // 🧽 Improved deduplication with normalisation
     topNames = [...new Set(topNames.map((n) => n.trim()))];
 
     middleEnglish = [...new Set(middleEnglish.map((n) => n.trim()))].filter(
@@ -399,7 +379,6 @@ function generate() {
 
     document.getElementById("output").scrollIntoView({ behavior: "smooth" });
 
-    // ✅ Merge single English full names like "Lee Loong Kuan Jasper"
     if (
       middleChinese.length === 0 &&
       !hasHeJia &&
@@ -412,7 +391,6 @@ function generate() {
     function classifyToken(tok) {
       if (!tok) return;
 
-      // Special handling for 合家
       if (tok.includes("合家")) {
         hasHeJia = true;
         const donor = tok.replace("合家", "").trim();
@@ -420,7 +398,6 @@ function generate() {
         return;
       }
 
-      // 💥 Enhanced logic: force English phrases with Pte Ltd etc. to middleEnglish
       if (
         /^[A-Za-z0-9\s&,.]+$/.test(tok) &&
         /\b(Pte\.?\s?Ltd\.?|Ltd\.?|Sdn\.?\s?Bhd\.?|Inc\.?|LLP|PLC|Corporation|Company)\b/i.test(
@@ -438,7 +415,6 @@ function generate() {
         return;
       }
 
-      // 📌 Additional safeguard: if it looks English-ish
       if (!isChinese(tok) && /[A-Za-z]/.test(tok)) {
         const cleanTok = tok.trim().toLowerCase();
         if (!topNamesSet.has(cleanTok)) {
@@ -447,7 +423,6 @@ function generate() {
         return;
       }
 
-      // Everything else
       if (isChinese(tok)) {
         middleChinese.push(tok);
       } else {
@@ -455,7 +430,6 @@ function generate() {
       }
     }
 
-    // === Render Output Page ===
     const wrapper = document.createElement("div");
     wrapper.className = "output-wrapper";
 
@@ -475,14 +449,12 @@ function generate() {
       position: "relative",
     });
 
-    // 🪄 FIRST: reassign topNames to middle if middle is empty
     if (
       middleChinese.length === 0 &&
       middleEnglish.length === 0 &&
       !hasHeJia &&
       topNames.length > 0
     ) {
-      // If the top name looks Chinese, push to middleChinese, else to middleEnglish
       topNames.forEach((name) => {
         if (/[\u4e00-\u9fff]/.test(name)) {
           middleChinese.push(name);
@@ -496,7 +468,6 @@ function generate() {
     const topZone = document.createElement("div");
     topZone.className = "zone top-zone";
     if (topNames.length > 0) {
-      // 🧹 Remove topNames that already appear in middleEnglish
       topNames = topNames.filter((name) => {
         const norm = name.trim().toLowerCase();
         return !middleEnglish.some(
@@ -507,7 +478,6 @@ function generate() {
         );
       });
 
-      // 🏷️ Render top zone only with unique names
       topNames.forEach((name) => {
         const div = document.createElement("div");
         div.textContent = name;
@@ -600,7 +570,6 @@ function generate() {
       });
     });
 
-    // If no middle names at all, but has a single English corporate name — centre it big!
     if (
       middleChinese.length === 0 &&
       middleEnglish.length === 1 &&
@@ -630,17 +599,15 @@ function generate() {
         middleZone.appendChild(divBottom);
       }
 
-      // ✅ Prevent double rendering
       middleEnglish = [];
     }
 
-    // 💬 Render middleEnglish names if any (e.g., Dr. Bernard Yeo Hock Bee)
     if (middleEnglish.length > 0) {
       const englishWrapper = document.createElement("div");
       englishWrapper.className = "middle-zone";
 
       if (middleChinese.length > 0) {
-        englishWrapper.style.marginTop = "10px"; // or try "5px" for tighter look
+        englishWrapper.style.marginTop = "10px";
       }
 
       middleEnglish.forEach((name) => {
@@ -665,7 +632,6 @@ function generate() {
       );
       const middleRows = middleWrappers.length;
 
-      // Float 合家 ONLY if the middle section is short (visually low)
       if (totalMiddle <= 13) {
         const middleRows = middleZone.querySelectorAll(
           ".middle-zone.chinese-wrapper"
@@ -680,12 +646,10 @@ function generate() {
         };
 
         if (middleRows <= 2) {
-          // Safe to float up
           const base = 410;
           const boost = Math.min((13 - totalMiddle) * 5, 110);
-          divStyle.bottom = "20px"; // stick it to the actual bottom of .bottom-zone
+          divStyle.bottom = "20px";
         } else {
-          // Keep default bottom
           divStyle.bottom = "410px";
         }
 
@@ -707,7 +671,6 @@ function exportToPDF() {
   const pages = document.querySelectorAll(".output-page");
   const wrappers = document.querySelectorAll(".output-wrapper");
 
-  // Remove scale for accurate capture
   wrappers.forEach((wrapper) => {
     wrapper.style.transform = "none";
   });
@@ -723,7 +686,6 @@ function exportToPDF() {
 
   function captureNextPage() {
     if (currentIndex >= pages.length) {
-      // Restore the scale after export
       wrappers.forEach((wrapper) => {
         wrapper.style.transform = "scale(0.4)";
         wrapper.style.transformOrigin = "top left";
@@ -743,7 +705,7 @@ function exportToPDF() {
           html2canvas(currentPage, {
             allowTaint: true,
             useCORS: true,
-            scale: 2, // Ensure high resolution
+            scale: 2,
             scrollY: -window.scrollY,
             backgroundColor: null,
             windowWidth: 2480,
@@ -760,7 +722,7 @@ function exportToPDF() {
             captureNextPage();
           });
           document.body.classList.remove("pdf-mode");
-        }, 300); // Delay to allow render
+        }, 300);
       });
     });
   }
