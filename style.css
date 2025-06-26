@@ -128,12 +128,12 @@ button {
 
 button:hover {
   background-color: #004999;
-  transform: scale(1.05);
+  : scale(1.05);
 }
 
 button:active {
   background-color: #003366;
-  transform: scale(0.98);
+  : scale(0.98);
 }
 
 #output {
@@ -174,12 +174,12 @@ button:active {
 .top-zone {
   flex-direction: column;
   align-items: center;
-  margin-top: 570px; /* lowered from 600px to bring everything up */
-  font-size: 40px; /* made company names larger */
+  margin-top: 570px;
+  font-size: 40px;
 }
 
 .middle-zone {
-  max-height: 1000px; /* or even 650px if you have 4 rows */
+  max-height: 1000px;
   margin-top: -40px;
   overflow: visible;
   display: flex;
@@ -187,7 +187,7 @@ button:active {
   align-items: center;
   justify-content: flex-start;
   gap: 20px;
-  position: relative; /* 👈 enable z-index stacking */
+  position: relative;
   z-index: 1;
 }
 
@@ -203,7 +203,7 @@ button:active {
   padding-bottom: 20px;
   margin-bottom: 410px;
   gap: 10px;
-  position: relative; /* required for children to be positioned absolutely */
+  position: relative;
   overflow: visible;
   z-index: 10;
 }
@@ -222,12 +222,12 @@ button:active {
 }
 
 .middle-zone.chinese-wrapper + .middle-zone.chinese-wrapper {
-  margin-top: 10px; /* add vertical spacing between row1 and row2 */
+  margin-top: 10px;
 }
 
 .vertical-name {
-  writing-mode: vertical-rl; /* key to vertical flow */
-  text-orientation: upright; /* keeps Latin chars upright */
+  writing-mode: vertical-rl;
+  text-orientation: upright;
   line-height: 1.2;
   white-space: nowrap;
   display: inline-block;
@@ -235,7 +235,7 @@ button:active {
 
 .vertical-name span.rotated-bracket {
   display: inline-block;
-  transform: rotate(90deg) translateX(8px);
+  transform: rotate(90deg) translateX(9px) translateY(-2px);
   transform-origin: center center;
 }
 
@@ -251,7 +251,7 @@ button:active {
 }
 
 .output-wrapper {
-  transform: scale(0.4); /* adjust scale as needed */
+  transform: scale(0.4);
   transform-origin: top left;
   margin-bottom: 40px;
 }
@@ -291,7 +291,7 @@ button:active {
   font-size: 110px;
   line-height: 1.2;
   margin: 2px;
-  letter-spacing: 2px; /* NEW */
+  letter-spacing: 2px;
 }
 
 .horizontal-letter {
@@ -301,7 +301,7 @@ button:active {
 }
 
 .middle-zone.no-top {
-  margin-top: -100px; /* adjust as needed, e.g. 200px instead of default 560px from .top-zone */
+  margin-top: -100px;
 }
 
 @media print {
@@ -319,7 +319,7 @@ button:active {
 
 @media screen {
   body:not(.pdf-mode) .vertical-name span.rotated-bracket {
-    transform: rotate(0deg) translateX(5px) scaleX(-1); /* Mirror flip */
+    transform: rotate(0deg) translateX(5px) scaleX(-1);
   }
 }
 
@@ -335,7 +335,7 @@ button:active {
   }
 
   .output-wrapper {
-    transform: scale(0.2); /* smaller on mobile */
+    transform: scale(0.2);
     transform-origin: top left;
   }
 }
