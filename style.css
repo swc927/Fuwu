@@ -1,0 +1,355 @@
+* {
+  box-sizing: border-box;
+}
+.hero-header {
+  background: linear-gradient(to right, #f5f7fa, #e4ecf7);
+  padding: 40px 20px;
+  border-radius: 12px;
+  margin-bottom: 30px;
+  width: 100%;
+  max-width: 900px;
+  text-align: center;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+}
+
+.hero-header h1 {
+  font-size: 36px;
+  font-weight: 700;
+  font-family: "Noto Serif SC", "KaiTi", serif;
+  color: #1e2a38;
+  margin-bottom: 15px;
+  line-height: 1.3;
+}
+
+.hero-header h1 .english {
+  display: block;
+  font-size: 24px;
+  font-weight: 400;
+  color: #5a5a5a;
+  font-family: "Helvetica Neue", sans-serif;
+  margin-top: 5px;
+}
+
+.hero-header p {
+  font-size: 18px;
+  line-height: 1.6;
+  color: #444;
+  font-family: "Noto Sans SC", "Helvetica Neue", sans-serif;
+}
+
+.hero-header p .english {
+  color: #666;
+  font-size: 16px;
+}
+
+header {
+  text-align: center;
+  margin-bottom: 30px;
+  padding-top: 20px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid #e6e6e6;
+}
+
+header h1 {
+  font-family: "Noto Serif SC", "KaiTi", serif;
+  font-size: 40px;
+  color: #222;
+  margin-bottom: 10px;
+  letter-spacing: 2px;
+}
+
+header p {
+  font-size: 18px;
+  color: #555;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.input-section {
+  width: 80%;
+  max-width: 800px;
+  margin-bottom: 10px;
+  text-align: left;
+}
+
+.input-section label {
+  font-size: 16px;
+  font-weight: bold;
+  color: #333;
+  font-family: "Noto Serif SC", "KaiTi", serif;
+  display: block;
+  margin-bottom: 5px;
+}
+
+body {
+  margin: 0;
+  padding: 20px;
+  font-family: "KaiTi", "楷体", serif;
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+textarea {
+  background: linear-gradient(to bottom right, #fdfdfd, #f2f2f2);
+}
+
+.button-group {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+textarea {
+  width: 80%;
+  height: 200px;
+  font-size: 16px;
+  margin-bottom: 20px;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+button {
+  padding: 12px 24px;
+  background-color: #0066cc;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  font-size: 18px;
+  font-weight: bold;
+  cursor: pointer;
+  margin: 20px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+button:hover {
+  background-color: #004999;
+  transform: scale(1.05);
+}
+
+button:active {
+  background-color: #003366;
+  transform: scale(0.98);
+}
+
+#output {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+  overflow: visible;
+  flex-wrap: wrap;
+}
+
+.output-page {
+  page-break-after: always;
+  width: 2480px;
+  height: 1754px;
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 40px;
+  position: relative;
+  overflow: visible;
+  min-height: 1754px;
+  min-width: 2480px;
+}
+
+.zone {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.top-zone {
+  flex-direction: column;
+  align-items: center;
+  margin-top: 570px; /* lowered from 600px to bring everything up */
+  font-size: 40px; /* made company names larger */
+}
+
+.middle-zone {
+  max-height: 1000px; /* or even 650px if you have 4 rows */
+  margin-top: -40px;
+  overflow: visible;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 20px;
+  position: relative; /* 👈 enable z-index stacking */
+  z-index: 1;
+}
+
+.bottom-zone {
+  font-size: 60px;
+  white-space: nowrap;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  max-height: 400px;
+  overflow-y: auto;
+  padding-bottom: 20px;
+  margin-bottom: 410px;
+  gap: 10px;
+  position: relative; /* required for children to be positioned absolutely */
+  overflow: visible;
+  z-index: 10;
+}
+
+.middle-zone.chinese-wrapper {
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  gap: 30px;
+  margin-bottom: 10px;
+  margin-top: -20px;
+}
+
+.middle-zone.chinese-wrapper + .middle-zone.chinese-wrapper {
+  margin-top: 10px; /* add vertical spacing between row1 and row2 */
+}
+
+.vertical-name {
+  writing-mode: vertical-rl; /* key to vertical flow */
+  text-orientation: upright; /* keeps Latin chars upright */
+  line-height: 1.2;
+  white-space: nowrap;
+  display: inline-block;
+}
+
+.vertical-name span.rotated-bracket {
+  display: inline-block;
+  transform: rotate(90deg) translateX(8px);
+  transform-origin: center center;
+}
+
+.middle-zone .english {
+  font-size: 80px;
+  height: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+  margin-top: 0;
+  line-height: 0.8;
+}
+
+.output-wrapper {
+  transform: scale(0.4); /* adjust scale as needed */
+  transform-origin: top left;
+  margin-bottom: 40px;
+}
+
+.corporate-only-centre {
+  color: #000;
+}
+
+.top-zone .horizontal-letter {
+  writing-mode: horizontal-tb !important;
+  transform: rotate(0deg) !important;
+  display: inline-block !important;
+}
+
+.top-zone .vertical-letter {
+  writing-mode: vertical-rl !important;
+  transform: none !important;
+  display: inline-block !important;
+}
+
+.horizontal-letter {
+  writing-mode: horizontal-tb;
+  transform: rotate(0deg);
+  display: inline-block;
+}
+.top-mixed-name {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.vertical-letter {
+  writing-mode: vertical-rl;
+  display: inline-block;
+  font-size: 110px;
+  line-height: 1.2;
+  margin: 2px;
+  letter-spacing: 2px; /* NEW */
+}
+
+.horizontal-letter {
+  writing-mode: horizontal-tb;
+  font-size: 80px;
+  margin: 2px;
+}
+
+.middle-zone.no-top {
+  margin-top: -100px; /* adjust as needed, e.g. 200px instead of default 560px from .top-zone */
+}
+
+@media print {
+  .output-page {
+    break-after: page;
+    page-break-after: always;
+  }
+
+  body {
+    margin: 0;
+    padding: 0;
+    zoom: 1;
+  }
+}
+
+@media screen {
+  body:not(.pdf-mode) .vertical-name span.rotated-bracket {
+    transform: rotate(0deg) translateX(5px) scaleX(-1); /* Mirror flip */
+  }
+}
+
+@media screen and (max-width: 768px) {
+  textarea {
+    width: 95%;
+    font-size: 14px;
+  }
+
+  button {
+    width: 100%;
+    margin: 10px 0;
+  }
+
+  .output-wrapper {
+    transform: scale(0.2); /* smaller on mobile */
+    transform-origin: top left;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  header h1 {
+    font-size: 24px;
+  }
+
+  header p {
+    font-size: 14px;
+  }
+
+  button {
+    font-size: 16px;
+  }
+}

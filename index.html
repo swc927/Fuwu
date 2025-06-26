@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fuwu Layout</title>
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC&display=swap" rel="stylesheet">
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+
+<header class="hero-header">
+  <h1>
+    <span class="chinese">福物牌位</span>
+    <span class="english">Fuwu Name Display</span>
+  </h1>
+  <p>
+    <span class="chinese">输入姓名，每一段落代表一页，点击生成即可预览并导出 PDF。</span><br />
+    <span class="english">Enter donor names. Each paragraph = 1 page. Click “Generate” to preview and export as PDF.</span>
+  </p>
+</header>
+
+<body>
+  <textarea id="input" placeholder="Enter names here...
+
+  One block per page.
+  合家 names will auto-float to bottom.
+  Max 70 names."></textarea>
+  <div class="button-group">
+    <button onclick="clearAll()">Clear All</button>
+
+    <button onclick="generate(); fixChineseCompanySplitRender();">Generate</button>
+    <button onclick="exportToPDF()">Export to PDF</button>
+  </div>
+
+
+  <div id="output"></div>
+  <script src="script.js"></script>
+</body>
+
+</html>
