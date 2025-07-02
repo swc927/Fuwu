@@ -239,7 +239,7 @@ button:active {
 }
 
 .middle-zone .english {
-  font-size: 80px;
+  font-size: 60px;
   height: auto;
   display: flex;
   align-items: center;
@@ -247,6 +247,12 @@ button:active {
   white-space: nowrap;
   margin-top: 0;
   line-height: 0.8;
+}
+
+.english {
+  text-align: center;
+  line-height: 1.2;
+  margin: 8px 0;
 }
 
 .output-wrapper {
