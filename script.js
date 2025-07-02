@@ -2,6 +2,36 @@ function isChinese(text) {
   return /[\u4e00-\u9fff]/.test(text);
 }
 
+function handleSingleCompanyWithDonorsBlock(lines) {
+  if (
+    lines.length >= 2 &&
+    /^(.*\b(Pte\.?\s*Ltd\.?|Sdn\.?\s*Bhd\.?|Ltd\.?|Corporation|Company|Inc\.?))$/i.test(
+      lines[0]
+    )
+  ) {
+    const companyName = lines[0].trim();
+    const donorNames = lines
+      .slice(1)
+      .map((line) => line.trim())
+      .filter(Boolean);
+
+    const allEnglish = donorNames.every((name) =>
+      /^[A-Za-z][A-Za-z.'\-\s]*$/.test(name)
+    );
+
+    if (allEnglish) {
+      return {
+        isMatch: true,
+        topNames: [companyName],
+        middleChinese: [],
+        middleEnglish: donorNames,
+        hasHeJia: false,
+      };
+    }
+  }
+  return { isMatch: false };
+}
+
 function createVerticalNameDiv(name, defaultFontSize) {
   name = name.replace(/\((.*?)\)/g, "（$1）");
 
@@ -178,6 +208,179 @@ function paginateChineseNames(chineseNames, maxPerPage = 70) {
   return pages;
 }
 
+function renderPage(topNames, middleChinese, middleEnglish, hasHeJia) {
+  const output = document.getElementById("output");
+  const wrapper = document.createElement("div");
+  wrapper.className = "output-wrapper";
+
+  const page = document.createElement("div");
+  page.className = "output-page";
+  Object.assign(page.style, {
+    width: "2480px",
+    height: "1754px",
+    backgroundImage: "url('Fuwu.jpg')",
+    backgroundSize: "cover",
+    backgroundPosition: "center",
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: "40px",
+    position: "relative",
+  });
+
+  const topZone = document.createElement("div");
+  topZone.className = "zone top-zone";
+
+  topNames.forEach((name) => {
+    const div = document.createElement("div");
+    div.textContent = name;
+
+    if (name.length >= 50) {
+      div.style.fontSize = "30px";
+    } else if (name.length >= 40) {
+      div.style.fontSize = "34px";
+    } else if (name.length >= 30) {
+      div.style.fontSize = "36px";
+    } else {
+      div.style.fontSize = "40px";
+    }
+
+    topZone.appendChild(div);
+  });
+
+  const middleZone = document.createElement("div");
+  middleZone.className = "zone middle-zone";
+
+  const chinesePages = paginateChineseNames(middleChinese, 70);
+  chinesePages.forEach((subset, pageIndex) => {
+    let row1 = [],
+      row2 = [],
+      row3 = [],
+      row4 = [],
+      row5 = [];
+    let chineseFontSize = "40px";
+
+    if (subset.length <= 2) {
+      row1 = subset;
+      chineseFontSize = "120px";
+    } else if (subset.length <= 4) {
+      row1 = subset;
+      chineseFontSize = "100px";
+    } else if (subset.length <= 13) {
+      const half = Math.ceil(subset.length / 2);
+      row1 = subset.slice(0, half);
+      row2 = subset.slice(half);
+      chineseFontSize = "60px";
+    } else if (subset.length <= 18) {
+      const third = Math.ceil(subset.length / 3);
+      row1 = subset.slice(0, third);
+      row2 = subset.slice(third, third * 2);
+      row3 = subset.slice(third * 2);
+      chineseFontSize = "48px";
+    } else if (subset.length <= 24) {
+      const third = Math.ceil(subset.length / 3);
+      row1 = subset.slice(0, third);
+      row2 = subset.slice(third, third * 2);
+      row3 = subset.slice(third * 2);
+      chineseFontSize = "42px";
+    } else if (subset.length <= 36) {
+      const quarter = Math.ceil(subset.length / 4);
+      row1 = subset.slice(0, quarter);
+      row2 = subset.slice(quarter, quarter * 2);
+      row3 = subset.slice(quarter * 2, quarter * 3);
+      row4 = subset.slice(quarter * 3);
+      chineseFontSize = "36px";
+    } else {
+      const fifth = Math.ceil(subset.length / 5);
+      row1 = subset.slice(0, fifth);
+      row2 = subset.slice(fifth, fifth * 2);
+      row3 = subset.slice(fifth * 2, fifth * 3);
+      row4 = subset.slice(fifth * 3, fifth * 4);
+      row5 = subset.slice(fifth * 4);
+      chineseFontSize = "32px";
+    }
+
+    const rows = [row1, row2, row3, row4, row5];
+    rows.forEach((row, idx) => {
+      if (row.length === 0) return;
+      const div = document.createElement("div");
+      div.className = "middle-zone chinese-wrapper";
+      if (row5.length > 0) {
+        div.style.marginTop = idx === 0 ? "80px" : "10px";
+        div.style.gap = "5px";
+      }
+      row.forEach((name) => {
+        div.appendChild(createVerticalNameDivWithTitle(name, chineseFontSize));
+      });
+      middleZone.appendChild(div);
+    });
+  });
+
+  if (
+    middleChinese.length === 0 &&
+    middleEnglish.length === 1 &&
+    !hasHeJia &&
+    middleEnglish[0].split(/\s+/).length === 4
+  ) {
+    const smartSplit = splitEnglishNameSmartly(middleEnglish[0].trim());
+
+    if (smartSplit) {
+      const divTop = document.createElement("div");
+      divTop.className = "corporate-only-centre";
+      divTop.textContent = smartSplit.top;
+
+      const divBottom = document.createElement("div");
+      divBottom.className = "corporate-only-centre";
+      divBottom.textContent = smartSplit.bottom;
+
+      [divTop, divBottom].forEach((div) => {
+        div.style.fontSize = "70px";
+        div.style.fontWeight = "bold";
+        div.style.textAlign = "center";
+        div.style.marginTop = "5px";
+        div.style.lineHeight = "1.2";
+      });
+
+      middleZone.appendChild(divTop);
+      middleZone.appendChild(divBottom);
+      middleEnglish = [];
+    }
+  }
+
+  if (middleEnglish.length > 0) {
+    const englishWrapper = document.createElement("div");
+    englishWrapper.className = "middle-zone";
+
+    if (middleChinese.length > 0) {
+      englishWrapper.style.marginTop = "10px";
+    }
+
+    middleEnglish.forEach((name) => {
+      const div = document.createElement("div");
+      div.className = "english";
+      div.textContent = name;
+      englishWrapper.appendChild(div);
+    });
+
+    middleZone.appendChild(englishWrapper);
+  }
+
+  const bottomZone = document.createElement("div");
+  bottomZone.className = "zone bottom-zone";
+  if (hasHeJia) {
+    const div = document.createElement("div");
+    div.textContent = "合家";
+    bottomZone.appendChild(div);
+  }
+
+  page.appendChild(topZone);
+  page.appendChild(middleZone);
+  page.appendChild(bottomZone);
+  wrapper.appendChild(page);
+  output.appendChild(wrapper);
+}
+
 function generate() {
   const rawInput = document.getElementById("input").value.trim();
   const cleanInput = rawInput.replace(/&\s*\n\s*/g, "& ");
@@ -191,10 +394,22 @@ function generate() {
   output.innerHTML = "";
 
   pageBlocks.forEach((block) => {
+    block = block.replace(/\u00A0/g, " ");
     const lines = block
       .split("\n")
       .map((l) => l.trim())
       .filter(Boolean);
+
+    const fixedBlock = handleSingleCompanyWithDonorsBlock(lines);
+    if (fixedBlock.isMatch) {
+      renderPage(
+        fixedBlock.topNames,
+        fixedBlock.middleChinese,
+        fixedBlock.middleEnglish,
+        fixedBlock.hasHeJia
+      );
+      return;
+    }
 
     let topNames = [];
     let middleChinese = [];
@@ -624,6 +839,19 @@ function generate() {
         const div = document.createElement("div");
         div.className = "english";
         div.textContent = name;
+
+        const charCount = name.trim().length;
+
+        if (charCount > 40) {
+          div.style.fontSize = "36px";
+        } else if (charCount > 30) {
+          div.style.fontSize = "42px";
+        } else if (charCount > 20) {
+          div.style.fontSize = "48px";
+        } else {
+          div.style.fontSize = "56px";
+        }
+
         englishWrapper.appendChild(div);
       });
 
