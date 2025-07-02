@@ -123,7 +123,6 @@ function fixChineseCompanySplitRender() {
       !hasEnglish &&
       !hasHeJia
     ) {
-      
       topNames.forEach((companyName) => {
         const matchingDiv = Array.from(topZone.querySelectorAll("div")).find(
           (d) => d.textContent.trim() === companyName
@@ -481,6 +480,17 @@ function generate() {
       topNames.forEach((name) => {
         const div = document.createElement("div");
         div.textContent = name;
+
+        if (name.length >= 50) {
+          div.style.fontSize = "30px";
+        } else if (name.length >= 40) {
+          div.style.fontSize = "34px";
+        } else if (name.length >= 30) {
+          div.style.fontSize = "36px";
+        } else {
+          div.style.fontSize = "40px";
+        }
+
         topZone.appendChild(div);
       });
 
