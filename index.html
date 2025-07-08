@@ -12,18 +12,21 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 
-<header class="hero-header">
-  <h1>
-    <span class="chinese">福物牌位</span>
-    <span class="english">Fuwu Name Display</span>
-  </h1>
-  <p>
-    <span class="chinese">输入姓名，每一段落代表一页，点击生成即可预览并导出 PDF。</span><br />
-    <span class="english">Enter donor names. Each paragraph = 1 page. Click “Generate” to preview and export as PDF.</span>
-  </p>
-</header>
-
 <body>
+
+  <header class="hero-header">
+    <h1>
+      <span class="chinese">福物牌位</span>
+      <span class="english">Fuwu Name Display</span>
+    </h1>
+    <p>
+      <span class="chinese">输入姓名，每一段落代表一页，点击生成即可预览并导出 PDF。</span><br />
+      <span class="english">Enter donor names. Each paragraph = 1 page. Click “Generate” to preview and export as PDF.</span>
+    </p>
+    <div id="pageCountDisplay" style="margin-top: 20px; font-size: 20px; font-weight: bold;"></div>
+
+  </header>
+
   <textarea id="input" placeholder="Enter names here...
 
   One block per page.
