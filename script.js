@@ -32,6 +32,19 @@ function handleSingleCompanyWithDonorsBlock(lines) {
   return { isMatch: false };
 }
 
+function splitNameWithFamily(name) {
+  const words = name.trim().split(/\s+/);
+
+  if (words.includes("&") && /family/i.test(name) && words.length >= 3) {
+    const andIndex = words.indexOf("&");
+    const topLine = words.slice(0, andIndex).join(" ");
+    const bottomLine = words.slice(andIndex).join(" ");
+    return { top: topLine, bottom: bottomLine };
+  }
+
+  return null;
+}
+
 function createVerticalNameDiv(name, defaultFontSize) {
   name = name.replace(/\((.*?)\)/g, "（$1）");
 
@@ -180,26 +193,6 @@ function fixChineseCompanySplitRender() {
   });
 }
 
-function splitEnglishNameSmartly(name) {
-  const words = name.trim().split(/\s+/);
-  if (words.length !== 4) return null;
-
-  const [w1, w2, w3, w4] = words;
-
-  const firstIsNickname = w1.length > w4.length;
-  if (firstIsNickname) {
-    return {
-      top: w1,
-      bottom: [w2, w3, w4].join(" "),
-    };
-  } else {
-    return {
-      top: [w1, w2, w3].join(" "),
-      bottom: w4,
-    };
-  }
-}
-
 function paginateChineseNames(chineseNames, maxPerPage = 70) {
   const pages = [];
   for (let i = 0; i < chineseNames.length; i += maxPerPage) {
@@ -321,18 +314,17 @@ function renderPage(topNames, middleChinese, middleEnglish, hasHeJia) {
     middleChinese.length === 0 &&
     middleEnglish.length === 1 &&
     !hasHeJia &&
-    middleEnglish[0].split(/\s+/).length === 4
+    /&\s*Family/i.test(middleEnglish[0])
   ) {
-    const smartSplit = splitEnglishNameSmartly(middleEnglish[0].trim());
-
-    if (smartSplit) {
+    const familySplit = splitNameWithFamily(middleEnglish[0]);
+    if (familySplit) {
       const divTop = document.createElement("div");
       divTop.className = "corporate-only-centre";
-      divTop.textContent = smartSplit.top;
+      divTop.textContent = familySplit.top;
 
       const divBottom = document.createElement("div");
       divBottom.className = "corporate-only-centre";
-      divBottom.textContent = smartSplit.bottom;
+      divBottom.textContent = familySplit.bottom;
 
       [divTop, divBottom].forEach((div) => {
         div.style.fontSize = "70px";
@@ -348,6 +340,36 @@ function renderPage(topNames, middleChinese, middleEnglish, hasHeJia) {
     }
   }
 
+  if (
+    middleChinese.length === 0 &&
+    middleEnglish.length === 1 &&
+    !hasHeJia &&
+    /&\s*Family/i.test(middleEnglish[0])
+  ) {
+    const familySplit = splitNameWithFamily(middleEnglish[0]);
+    if (familySplit) {
+      const divTop = document.createElement("div");
+      divTop.className = "corporate-only-centre";
+      divTop.textContent = familySplit.top;
+
+      const divBottom = document.createElement("div");
+      divBottom.className = "corporate-only-centre";
+      divBottom.textContent = familySplit.bottom;
+
+      [divTop, divBottom].forEach((div) => {
+        div.style.fontSize = "70px";
+        div.style.fontWeight = "bold";
+        div.style.textAlign = "center";
+        div.style.marginTop = "5px";
+        div.style.lineHeight = "1.2";
+      });
+
+      middleZone.appendChild(divTop);
+      middleZone.appendChild(divBottom);
+      middleEnglish = []; // prevent re-rendering
+    }
+  }
+
   if (middleEnglish.length > 0) {
     const englishWrapper = document.createElement("div");
     englishWrapper.className = "middle-zone";
@@ -357,10 +379,54 @@ function renderPage(topNames, middleChinese, middleEnglish, hasHeJia) {
     }
 
     middleEnglish.forEach((name) => {
-      const div = document.createElement("div");
-      div.className = "english";
-      div.textContent = name;
-      englishWrapper.appendChild(div);
+      const divGroup = document.createElement("div");
+      divGroup.style.display = "flex";
+      divGroup.style.flexDirection = "column";
+      divGroup.style.alignItems = "center";
+
+      let topLine = name;
+      let bottomLine = "";
+      const isSolo = middleEnglish.length === 1 && !/&\s*Family/i.test(name);
+
+      const familySplit = splitNameWithFamily(name);
+
+      if (familySplit) {
+        const words = familySplit.top.trim().split(/\s+/);
+        if (words.length === 4) {
+          topLine = words[0];
+          bottomLine = words.slice(1).join(" ") + " " + familySplit.bottom;
+        } else if (words.length === 3) {
+          topLine = words.slice(0, 2).join(" ");
+          bottomLine = words[2] + " " + familySplit.bottom;
+        } else {
+          topLine = familySplit.top;
+          bottomLine = familySplit.bottom;
+        }
+      }
+
+      const divTop = document.createElement("div");
+      divTop.className = "english";
+      divTop.textContent = topLine;
+
+      const divBottom = document.createElement("div");
+      divBottom.className = "english";
+      divBottom.textContent = bottomLine;
+
+      [divTop, divBottom].forEach((div) => {
+        div.style.fontSize = isSolo ? "80px" : "40px";
+        div.style.textAlign = "center";
+        div.style.lineHeight = "1.2";
+        div.style.marginTop = "5px";
+      });
+
+      divGroup.appendChild(divTop);
+      if (bottomLine) {
+        divGroup.appendChild(divBottom);
+      } else {
+        divTop.style.fontSize = isSolo ? "60px" : "40px";
+      }
+
+      englishWrapper.appendChild(divGroup);
     });
 
     middleZone.appendChild(englishWrapper);
@@ -443,6 +509,11 @@ function generate() {
 
     lines.forEach((line) => {
       line.split(commaSplitRE).forEach((chunk) => {
+        if (/&\s*Family/i.test(line)) {
+          middleEnglish.push(line.trim());
+          return;
+        }
+
         const tokens = chunk.trim().split(/\s+/).filter(Boolean);
         const joined = tokens.join(" ");
         const capitalisedWords = tokens.filter((w) =>
@@ -795,38 +866,6 @@ function generate() {
       });
     });
 
-    if (
-      middleChinese.length === 0 &&
-      middleEnglish.length === 1 &&
-      !hasHeJia &&
-      middleEnglish[0].split(/\s+/).length === 4
-    ) {
-      const smartSplit = splitEnglishNameSmartly(middleEnglish[0].trim());
-
-      if (smartSplit) {
-        const divTop = document.createElement("div");
-        divTop.className = "corporate-only-centre";
-        divTop.textContent = smartSplit.top;
-
-        const divBottom = document.createElement("div");
-        divBottom.className = "corporate-only-centre";
-        divBottom.textContent = smartSplit.bottom;
-
-        [divTop, divBottom].forEach((div) => {
-          div.style.fontSize = "70px";
-          div.style.fontWeight = "bold";
-          div.style.textAlign = "center";
-          div.style.marginTop = "5px";
-          div.style.lineHeight = "1.2";
-        });
-
-        middleZone.appendChild(divTop);
-        middleZone.appendChild(divBottom);
-      }
-
-      middleEnglish = [];
-    }
-
     if (middleEnglish.length > 0) {
       const englishWrapper = document.createElement("div");
       englishWrapper.className = "middle-zone";
@@ -902,6 +941,11 @@ function generate() {
     page.appendChild(bottomZone);
     wrapper.appendChild(page);
     output.appendChild(wrapper);
+
+    const totalPages = document.querySelectorAll(".output-page").length;
+    document.getElementById(
+      "pageCountDisplay"
+    ).textContent = `Total Pages: ${totalPages}`;
   });
 }
 
