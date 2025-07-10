@@ -2,6 +2,39 @@ function isChinese(text) {
   return /[\u4e00-\u9fff]/.test(text);
 }
 
+function isEnglishFullName(text) {
+  return /^[A-Za-z0-9.,'’&()\-\s]+$/.test(text) && !isChinese(text);
+}
+
+function detectSingleCompanyOnlyBlock(lines) {
+  if (lines.length !== 1) return null;
+
+  const line = lines[0].trim();
+
+  const enCompanyRegex =
+    /\b(Pte\.?\s*Ltd\.?|Sdn\.?\s*Bhd\.?|Ltd\.?|Corporation|Company|Inc\.?|Watch(es)?|Renovation|Renovation\sWorks)$/i;
+
+  if (enCompanyRegex.test(line) && !isChinese(line)) {
+    return line;
+  }
+
+  return null;
+}
+
+function detectMultipleEnglishCompaniesOnly(lines) {
+  const enCompanyRegex =
+    /\b(Pte\.?\s*Ltd\.?|Sdn\.?\s*Bhd\.?|Ltd\.?|Corporation|Company|Inc\.?)$/i;
+  const matchedCompanies = lines
+    .map((line) => line.trim())
+    .filter((line) => enCompanyRegex.test(line));
+
+  if (matchedCompanies.length === lines.length && matchedCompanies.length > 0) {
+    return matchedCompanies;
+  }
+
+  return null;
+}
+
 function handleSingleCompanyWithDonorsBlock(lines) {
   if (
     lines.length >= 2 &&
@@ -115,6 +148,7 @@ function createVerticalNameDivWithTitle(name, defaultFontSize) {
     "JP(P)",
     "DMM",
   ];
+
   const div = document.createElement("div");
   div.className = "vertical-name";
 
@@ -138,6 +172,17 @@ function createVerticalNameDivWithTitle(name, defaultFontSize) {
     container.appendChild(verticalPart);
     container.appendChild(titleDiv);
     return container;
+  }
+
+  if (isEnglishFullName(name)) {
+    const englishDiv = document.createElement("div");
+    englishDiv.className = "english";
+    englishDiv.textContent = name;
+    englishDiv.style.fontSize = defaultFontSize;
+    englishDiv.style.textAlign = "center";
+    englishDiv.style.lineHeight = "1.2";
+    englishDiv.style.marginTop = "5px";
+    return englishDiv;
   }
 
   return createVerticalNameDiv(name, defaultFontSize);
@@ -366,7 +411,7 @@ function renderPage(topNames, middleChinese, middleEnglish, hasHeJia) {
 
       middleZone.appendChild(divTop);
       middleZone.appendChild(divBottom);
-      middleEnglish = []; // prevent re-rendering
+      middleEnglish = [];
     }
   }
 
@@ -466,6 +511,22 @@ function generate() {
       .map((l) => l.trim())
       .filter(Boolean);
 
+    const multiCompanies = detectMultipleEnglishCompaniesOnly(lines);
+    const blockIsPureEnglish = lines.every((line) =>
+      /^[A-Za-z0-9\s.,'’&()\-]+$/.test(line)
+    );
+
+    if (multiCompanies && blockIsPureEnglish) {
+      renderPage(multiCompanies, [], [], false);
+      return;
+    }
+
+    const singleCompany = detectSingleCompanyOnlyBlock(lines);
+    if (singleCompany) {
+      renderPage([], [], [singleCompany], false);
+      return;
+    }
+
     const fixedBlock = handleSingleCompanyWithDonorsBlock(lines);
     if (fixedBlock.isMatch) {
       renderPage(
@@ -509,6 +570,18 @@ function generate() {
 
     lines.forEach((line) => {
       line.split(commaSplitRE).forEach((chunk) => {
+        const trimmedChunk = chunk.trim();
+
+        const isLikelyCompany =
+          /\b(Pte\.?\s*Ltd\.?|Ltd\.?|Sdn\.?\s*Bhd\.?|Corporation|Company|Inc\.?|Graphics\.?|Textile\.?|Supplier\.?|Watch(es)?|Works)$/i.test(
+            trimmedChunk
+          );
+
+        if (isEnglishFullName(trimmedChunk) && !isLikelyCompany) {
+          middleEnglish.push(trimmedChunk);
+          return;
+        }
+
         if (/&\s*Family/i.test(line)) {
           middleEnglish.push(line.trim());
           return;
